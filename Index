@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<title>Seating Chart · SAS</title>
+<style>
+  /* ===== Brand (SAS-ish) ===== */
+  :root{
+    --brand-bg:#0A2342;
+    --brand-panel:#0f2c57;
+    --brand-ink:#F8FAFC;
+    --brand-sub:#C9D6E8;
+    --brand-accent:#C8102E;
+    --brand-accent-2:#1FBF75;
+    --line:#1d3c6a;
+
+    /* responsive knobs */
+    --seat-w: 110px;   /* seat min width */
+    --seat-h: 70px;    /* seat min height */
+    --board-gap: 8px;  /* space between seats */
+    --zoom: 1;         /* board scale */
+  }
+
+  html,body{height:100%}
+  body{
+    margin:0;
+    background:
+      radial-gradient(1200px 600px at 20% -10%, rgba(255,255,255,.06), transparent 60%),
+      radial-gradient(1200px 600px at 110% 10%, rgba(255,255,255,.05), transparent 60%),
+      var(--brand-bg);
+    color:var(--brand-ink);
+    font-family: ui-sans-serif, -apple-system, Segoe UI, Roboto, Inter, system-ui, Arial;
+  }
+
+  .wrap{max-width:1200px;margin:0 auto;padding:16px 12px 28px}
+
+  /* Sticky top bar with actions (good on phone too) */
+  .brandbar{
+    position:sticky; top:0; z-index:4;
+    background: linear-gradient(180deg, rgba(10,35,66, .97), rgba(10,35,66,.85));
+    backdrop-filter: blur(6px);
+    border-bottom:1px solid rgba(255,255,255,.08);
+    padding:10px 12px;
+  }
+  .brandbar .row{display:flex; gap:8px; align-items:center; flex-wrap:wrap}
+  .title{font-weight:800; letter-spacing:.2px; font-size:16px; margin-right:auto}
+  .accent{color:var(--brand-accent)}
+  .actions{display:flex; gap:8px; flex-wrap:wrap}
+
+  /* Controls + Board columns */
+  .grid{
+    display:grid; gap:12px; margin-top:12px;
+    grid-template-columns: 1fr 1.25fr;
+  }
+  @media (max-width:980px){
+    .grid{grid-template-columns:1fr}
+  }
+
+  .card{
+    background: rgba(255,255,255,.04);
+    border:1px solid rgba(255,255,255,.08);
+    border-radius:14px; padding:12px;
+  }
+  label{font-size:12px;color:var(--brand-sub);display:block;margin:8px 0 6px}
+  textarea,input,select{
+    width:100%; box-sizing:border-box; color:var(--brand-ink);
+    background:#081b36; border:1px solid var(--line); border-radius:12px; padding:12px 14px; outline:none;
+  }
+  textarea{min-height:136px; resize:vertical}
+  .row{display:flex; gap:10px; align-items:center}
+  .row > * { flex:1 }
+
+  /* Sliders line */
+  .sliders{display:grid; gap:10px; grid-template-columns: 1fr 1fr 1fr}
+  @media (max-width:680px){ .sliders{grid-template-columns:1fr} }
+  .inline{display:flex; gap:10px; align-items:center; flex-wrap:wrap}
+  .inline label{margin:0}
+
+  /* Buttons */
+  button{
+    border:1px solid var(--line);
+    background:#081b36; color:var(--brand-ink);
+    padding:12px 14px; border-radius:12px; font-weight:700; cursor:pointer; font-size:14px;
+    touch-action: manipulation;
+  }
+  button.primary{background:linear-gradient(120deg, var(--brand-accent), #ff4b5f); border-color:transparent}
+  button.ok{background:linear-gradient(120deg, var(--brand-accent-2), #169f5f); border-color:transparent}
+  button.warn{background:linear-gradient(120deg, #f59e0b, #d97706); border-color:transparent}
+  button.ghost:hover{border-color:#315792}
+  .note{font-size:12px;color:var(--brand-sub);margin-top:4px}
+  .okmsg{color:#dcfce7; background:rgba(31,191,117,.12); border:1px solid rgba(31,191,117,.35); padding:8px 10px; border-radius:10px; margin-top:8px}
+  .error{color:#fecaca; background:rgba(200,16,46,.12); border:1px solid rgba(200,16,46,.35); padding:8px 10px; border-radius:10px; margin-top:8px}
+
+  /* Board wrapper gets the zoom (so scrollbars behave) */
+  .boardOuter{
+    overflow:auto; padding:6px;
+    transform: scale(var(--zoom));
+    transform-origin: top left;
+  }
+  .board{
+    display:grid;
+    gap: var(--board-gap);
+    padding:8px;
+    background:rgba(255,255,255,0.03);
+    border:1px dashed rgba(255,255,255,0.1); border-radius:14px;
+    /* columns are set dynamically from JS */
+  }
+  .autofit .board{
+    grid-template-columns: repeat(auto-fit, minmax(var(--seat-w), 1fr)) !important;
+  }
+
+  .seat{
+    min-width:var(--seat-w); min-height:var(--seat-h);
+    background:#081b36; border:1px solid var(--line);
+    border-radius:12px; padding:10px;
+    display:flex; flex-direction:column; justify-content:space-between;
+    user-select:none;
+  }
+  .seat.locked{outline:2px dashed #f59e0b}
+  .seat .name{font-weight:800; font-size:15px; line-height:1.2}
+  .seat .meta{display:flex; justify-content:space-between; align-items:center; font-size:11px; color:var(--brand-sub)}
+  .badge{display:inline-block; font-size:10px; padding:2px 6px; border-radius:999px; border:1px solid rgba(255,255,255,.2)}
+  .seat[draggable="true"]{cursor:grab}
+  .seat.dragging{opacity:.4}
+  .seat.drop-target{outline:2px solid var(--brand-accent)}
+
+  /* legend */
+  .legend{display:flex; flex-wrap:wrap; gap:8px; margin:10px 6px 0}
+  .legend .chip{display:inline-flex; align-items:center; gap:6px; border:1px solid rgba(255,255,255,.2); border-radius:999px; padding:6px 10px; font-size:12px}
+  .swatch{width:14px;height:14px;border-radius:3px;border:1px solid rgba(255,255,255,.25)}
+</style>
+</head>
+<body>
+  <div class="brandbar">
+    <div class="row">
+      <div class="title"><span class="accent">SAS</span> · Seating Chart</div>
+      <div class="actions">
+        <button class="primary" id="randomizeBtn">🎲 Randomize</button>
+        <button class="ghost" id="clearLocksBtn">Unlock all</button>
+        <button class="ghost" id="clearBoardBtn">Clear</button>
+        <button class="ok" id="exportCsvBtn">Export CSV</button>
+        <button class="warn" id="printBtn">Print</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <div class="grid">
+      <div class="card">
+        <label for="names">Roster (one per line or comma-separated)</label>
+        <textarea id="names" placeholder="e.g.
+Ana
+Ben
+Carlos
+Dina"></textarea>
+
+        <div class="row">
+          <div><label>Rows</label><input type="number" id="rows" min="1" value="5" inputmode="numeric" /></div>
+          <div><label>Columns</label><input type="number" id="cols" min="1" value="6" inputmode="numeric" /></div>
+          <div><label>Group size</label><input type="number" id="groupSize" min="1" value="2" inputmode="numeric" /></div>
+        </div>
+
+        <div class="row">
+          <div>
+            <label>Layout mode</label>
+            <select id="layoutMode">
+              <option value="rowfill">Fill left→right by rows</option>
+              <option value="colfill">Fill top→bottom by columns</option>
+            </select>
+          </div>
+          <div>
+            <label>Seat coloring</label>
+            <select id="seatShape">
+              <option value="solo">Solo seats</option>
+              <option value="groups">Color by groups</option>
+            </select>
+          </div>
+          <div>
+            <label>Random seed (optional)</label>
+            <input id="seed" placeholder="e.g. 42" inputmode="numeric" />
+          </div>
+        </div>
+
+        <label for="separate">Keep apart (pairs per line, comma between names)</label>
+        <textarea id="separate" placeholder="Ana,Ben
+Carlos,Dina"></textarea>
+        <div class="note">Tries up to 2000 shuffles to avoid side-by-side in same row.</div>
+
+        <!-- NEW: Responsive controls -->
+        <div class="card" style="margin-top:12px">
+          <div class="sliders">
+            <div>
+              <label>Board Zoom <span id="zoomVal" class="note">(100%)</span></label>
+              <input type="range" id="zoom" min="60" max="200" step="5" value="100" />
+            </div>
+            <div>
+              <label>Seat Size <span id="seatVal" class="note">(100%)</span></label>
+              <input type="range" id="seat" min="70" max="180" step="5" value="100" />
+            </div>
+            <div>
+              <label>Gap <span id="gapVal" class="note">(8px)</span></label>
+              <input type="range" id="gap" min="0" max="24" step="1" value="8" />
+            </div>
+          </div>
+          <div class="inline" style="margin-top:10px">
+            <label class="inline"><input type="checkbox" id="autoFit" /> Auto-fit columns (desktop)</label>
+            <label class="inline"><input type="checkbox" id="compact" /> Compact padding</label>
+          </div>
+        </div>
+
+        <div id="msg"></div>
+      </div>
+
+      <div class="card">
+        <div id="boardOuter" class="boardOuter">
+          <div id="board" class="board" aria-live="polite"></div>
+        </div>
+        <div class="legend" id="legend" aria-hidden="true"></div>
+      </div>
+    </div>
+  </div>
+
+<script>
+/* ===== Helpers ===== */
+const $ = s => document.querySelector(s);
+const board = $("#board"), boardOuter=$("#boardOuter"), legend = $("#legend"), msg = $("#msg");
+
+function parseRoster(t){ return Array.from(new Set(t.split(/[\n,]+/).map(s=>s.trim()).filter(Boolean))); }
+function parsePairs(t){
+  const pairs=[]; t.split(/\n+/).map(s=>s.trim()).filter(Boolean).forEach(line=>{
+    const [a,b]=line.split(",").map(x=>x?.trim()).filter(Boolean); if(a&&b) pairs.push([a,b]);
+  }); return pairs;
+}
+function seededShuffle(arr, seed){
+  function mulberry32(a){return function(){var t=a+=0x6D2B79F5;t=Math.imul(t^t>>>15,t|1);t^=t+Math.imul(t^t>>>7,t|61);return ((t^t>>>14)>>>0)/4294967296}}
+  const rnd = (seed!==undefined && seed!=="" && !Number.isNaN(+seed)) ? mulberry32(+seed) : Math.random;
+  const a=arr.slice(); for(let i=a.length-1;i>0;i--){const j=Math.floor(rnd()*(i+1)); [a[i],a[j]]=[a[j],a[i]];} return a;
+}
+const idx=(r,c,cols)=> r*cols+c;
+
+/* ===== State ===== */
+const state = {
+  rows:+$("#rows").value, cols:+$("#cols").value, groupSize:+$("#groupSize").value,
+  layoutMode:$("#layoutMode").value, seatShape:$("#seatShape").value, seed:$("#seed").value,
+  names:[], locked:{}, placed:[], groups:{}, colors:[],
+  autoFit:false, compact:false, zoom:1, seatScale:1, gap:8
+};
+
+function save(){ try{
+  localStorage.setItem("seatingChartRESP", JSON.stringify({
+    ...state, names:state.names, locked:state.locked, placed:state.placed, groups:state.groups
+  }));
+}catch(e){}}
+function load(){ try{
+  const raw=localStorage.getItem("seatingChartRESP"); if(!raw) return;
+  const s=JSON.parse(raw);
+  $("#rows").value = state.rows = s.rows ?? state.rows;
+  $("#cols").value = state.cols = s.cols ?? state.cols;
+  $("#groupSize").value = state.groupSize = s.groupSize ?? state.groupSize;
+  $("#layoutMode").value = state.layoutMode = s.layoutMode ?? state.layoutMode;
+  $("#seatShape").value = state.seatShape = s.seatShape ?? state.seatShape;
+  $("#seed").value = state.seed = s.seed ?? state.seed;
+  state.names = s.names ?? []; state.locked=s.locked ?? {}; state.placed=s.placed ?? []; state.groups=s.groups ?? {};
+  state.autoFit = s.autoFit ?? false; $("#autoFit").checked = state.autoFit;
+  state.compact = s.compact ?? false; $("#compact").checked = state.compact;
+  state.zoom = s.zoom ?? 1; $("#zoom").value = Math.round(state.zoom*100); $("#zoomVal").textContent=`(${Math.round(state.zoom*100)}%)`;
+  state.seatScale = s.seatScale ?? 1; $("#seat").value = Math.round(state.seatScale*100); $("#seatVal").textContent=`(${Math.round(state.seatScale*100)}%)`;
+  state.gap = s.gap ?? 8; $("#gap").value = state.gap; $("#gapVal").textContent=`(${state.gap}px)`;
+  $("#names").value = state.names.join("\n");
+  applyResponsiveKnobs();
+  draw();
+}catch(e){}}
+
+/* ===== Layout helpers ===== */
+function makeColors(n){
+  const base=[ "#C8102E", "#1FBF75", "#F59E0B", "#60A5FA", "#A78BFA", "#F472B6",
+               "#06B6D4", "#84CC16", "#FB7185", "#F97316", "#22D3EE", "#4ADE80" ];
+  return Array.from({length:n}, (_,i)=> base[i%base.length]);
+}
+function computeGroups(names, size){ const groups=[]; for(let i=0;i<names.length;i+=size) groups.push(names.slice(i,i+size)); return groups; }
+function mapGroups(groups){ const m={}; groups.forEach((g,gi)=>g.forEach(n=>m[n]=gi)); return m; }
+
+function adjacency(rows,cols){
+  const a={}; for(let r=0;r<rows;r++){ for(let c=0;c<cols;c++){
+    const i=idx(r,c,cols), n=[];
+    if(c>0) n.push(idx(r,c-1,cols)); if(c<cols-1) n.push(idx(r,c+1,cols));
+    // Vertical adjacency available—uncomment to include:
+    // if(r>0) n.push(idx(r-1,c,cols)); if(r<rows-1) n.push(idx(r+1,c,cols));
+    a[i]=n;
+  }} return a;
+}
+function violates(placed, pairs, adj){
+  if(!pairs.length) return false;
+  const pos={}; placed.forEach((n,i)=>{ if(n) pos[n]=i; });
+  for(const [a,b] of pairs){ const ia=pos[a], ib=pos[b]; if(ia==null||ib==null) continue; if(adj[ia]?.includes(ib)) return true; }
+  return false;
+}
+function place(shuffled){
+  const {rows,cols,layoutMode,locked}=state, total=rows*cols;
+  const out=Array(total).fill("");
+  for(const k of Object.keys(locked)){ const i=+k; if(i>=0 && i<total) out[i]=locked[k]; }
+  const lockedNames=new Set(Object.values(locked));
+  const toPlace=shuffled.filter(n=>!lockedNames.has(n)).slice(0,total);
+  let idxes=[...Array(total).keys()].filter(i=>!out[i]);
+  if(layoutMode==="colfill"){
+    idxes=[]; for(let c=0;c<cols;c++){ for(let r=0;r<rows;r++){ const i=idx(r,c,cols); if(!out[i]) idxes.push(i); } }
+  }
+  toPlace.forEach((name,i)=>{ if(idxes[i]!=null) out[idxes[i]]=name; });
+  return out;
+}
+
+/* ===== Draw ===== */
+function draw(){
+  const {rows,cols,seatShape,groups}=state;
+  if(state.autoFit){
+    board.classList.add("autofit");
+  } else {
+    board.classList.remove("autofit");
+    board.style.gridTemplateColumns = `repeat(${cols}, minmax(var(--seat-w), 1fr))`;
+  }
+  board.innerHTML="";
+  const total=rows*cols;
+  for(let i=0;i<total;i++){
+    const d=document.createElement("div"); d.className="seat"; d.dataset.index=i; d.draggable=true;
+    const nm=state.placed[i]||"";
+    const name=document.createElement("div"); name.className="name"; name.textContent= nm || "—";
+    const meta=document.createElement("div"); meta.className="meta";
+    const left=document.createElement("span"); const right=document.createElement("span");
+    right.innerHTML=`<span class="badge">#${i+1}</span>`;
+    if(state.locked[i]){ d.classList.add("locked"); left.textContent="🔒 locked"; }
+    meta.appendChild(left); meta.appendChild(right);
+    d.appendChild(name); d.appendChild(meta);
+
+    if(seatShape==="groups"){
+      const gid=groups[nm]; if(gid!=null){
+        const clr=state.colors[gid % state.colors.length] || "#315792";
+        d.style.background = `linear-gradient(135deg, ${toRGBA(clr,.28)}, #081b36 65%)`;
+        d.style.borderColor = clr+"88";
+      }
+    }
+    d.addEventListener("click", ()=>toggleLock(i));
+    wireDrag(d);
+    board.appendChild(d);
+  }
+  renderLegend();
+  save();
+}
+function toRGBA(hex,a){ try{
+  const h=hex.replace("#",""); const x=parseInt(h,16);
+  const r=(x>>16)&255, g=(x>>8)&255, b=x&255; return `rgba(${r},${g},${b},${a})`;
+}catch(e){return "rgba(255,255,255,.15)"}}
+function renderLegend(){
+  legend.innerHTML="";
+  if(state.seatShape!=="groups") return;
+  const inv=[], m=state.groups;
+  for(const [n,g] of Object.entries(m)){ if(!inv[g]) inv[g]=[]; inv[g].push(n); }
+  inv.filter(Boolean).forEach((members,i)=>{
+    const chip=document.createElement("div"); chip.className="chip";
+    const sw=document.createElement("span"); sw.className="swatch"; sw.style.background=state.colors[i%state.colors.length];
+    const t=document.createElement("span"); t.textContent=`Group ${i+1} (${members.length})`;
+    chip.appendChild(sw); chip.appendChild(t); legend.appendChild(chip);
+  });
+}
+
+/* ===== Actions ===== */
+function randomize(){
+  state.rows=Math.max(1,+$("#rows").value||1);
+  state.cols=Math.max(1,+$("#cols").value||1);
+  state.groupSize=Math.max(1,+$("#groupSize").value||1);
+  state.layoutMode=$("#layoutMode").value;
+  state.seatShape=$("#seatShape").value;
+  state.seed=$("#seed").value;
+  state.names=parseRoster($("#names").value);
+  const pairs=parsePairs($("#separate").value);
+  const total=state.rows*state.cols;
+  if(!state.names.length){ flash("Please add at least one name.", true); return; }
+
+  let best=null; const adj=adjacency(state.rows,state.cols); const tries=2000;
+  for(let t=0;t<tries;t++){
+    const sh=seededShuffle(state.names, state.seed ? (+state.seed+t) : undefined);
+    const gs=computeGroups(sh, state.groupSize);
+    state.groups=mapGroups(gs); state.colors=makeColors(gs.length);
+    const placed=place(sh);
+    if(!violates(placed,pairs,adj)){ best=placed; break; }
+    if(t===0) best=placed;
+  }
+  state.placed=best.slice(0,total);
+  draw(); flash("Seating updated.", false);
+}
+
+function toggleLock(i){
+  const name=state.placed[i]; if(!name) return;
+  if(state.locked[i]) delete state.locked[i];
+  else{
+    for(const [k,v] of Object.entries(state.locked)){ if(v===name) delete state.locked[k]; }
+    state.locked[i]=name;
+  }
+  draw();
+}
+function clearLocks(){ state.locked={}; draw(); flash("All seats unlocked.", false); }
+function clearBoard(){ state.locked={}; state.placed=[]; draw(); flash("Board cleared.", false); }
+function exportCSV(){
+  const {rows,cols}=state; let out="Row,Col,Seat,Name,Group\n";
+  for(let r=0;r<rows;r++){ for(let c=0;c<cols;c++){
+    const i=idx(r,c,cols), n=state.placed[i]||"", g=state.groups[n]!=null?(state.groups[n]+1):"";
+    out += `${r+1},${c+1},${i+1},"${n.replace(/"/g,'""')}",${g}\n`;
+  }}
+  const blob=new Blob([out],{type:"text/csv"}); const url=URL.createObjectURL(blob);
+  const a=document.createElement("a"); a.href=url; a.download="seating-chart.csv"; a.click(); URL.revokeObjectURL(url);
+}
+function printBoard(){ window.print(); }
+function flash(t,err){ msg.innerHTML=`<div class="${err?'error':'okmsg'}">${t}</div>`; setTimeout(()=>msg.innerHTML="",3000); }
+
+/* ===== Drag & drop ===== */
+let dragFrom=null;
+function wireDrag(el){
+  el.addEventListener("dragstart", e=>{ dragFrom=+el.dataset.index; el.classList.add("dragging"); e.dataTransfer.effectAllowed="move";});
+  el.addEventListener("dragend", ()=>{ dragFrom=null; el.classList.remove("dragging"); document.querySelectorAll(".seat").forEach(x=>x.classList.remove("drop-target"));});
+  el.addEventListener("dragover", e=>{ e.preventDefault(); el.classList.add("drop-target"); e.dataTransfer.dropEffect="move";});
+  el.addEventListener("dragleave", ()=> el.classList.remove("drop-target"));
+  el.addEventListener("drop", e=>{
+    e.preventDefault(); const to=+el.dataset.index; if(dragFrom==null || to===dragFrom) return;
+    const a=state.placed[dragFrom], b=state.placed[to];
+    state.placed[dragFrom]=b; state.placed[to]=a;
+    const lockFrom=state.locked[dragFrom], lockTo=state.locked[to];
+    delete state.locked[dragFrom]; delete state.locked[to];
+    if(lockFrom && b===lockFrom) state.locked[to]=b;
+    if(lockTo && a===lockTo) state.locked[dragFrom]=a;
+    draw();
+  });
+}
+
+/* ===== Responsive controls (zoom/size/gap/fit) ===== */
+function applyResponsiveKnobs(){
+  document.documentElement.style.setProperty('--zoom', String(state.zoom));
+  document.documentElement.style.setProperty('--seat-w', `calc(${110*state.seatScale}px)`);  // base 110
+  document.documentElement.style.setProperty('--seat-h', `calc(${70*state.seatScale}px)`);   // base 70
+  document.documentElement.style.setProperty('--board-gap', `${state.gap}px`);
+  boardOuter.classList.toggle("autofit", state.autoFit); // only affects CSS if .autofit used; we also set in draw()
+}
+$("#zoom").addEventListener("input", e=>{
+  state.zoom = (+e.target.value)/100; $("#zoomVal").textContent=`(${e.target.value}%)`; applyResponsiveKnobs(); save();
+});
+$("#seat").addEventListener("input", e=>{
+  state.seatScale = (+e.target.value)/100; $("#seatVal").textContent=`(${e.target.value}%)`; applyResponsiveKnobs(); save();
+});
+$("#gap").addEventListener("input", e=>{
+  state.gap = +e.target.value; $("#gapVal").textContent=`(${state.gap}px)`; applyResponsiveKnobs(); save();
+});
+$("#autoFit").addEventListener("change", e=>{
+  state.autoFit = e.target.checked; applyResponsiveKnobs(); draw();
+});
+$("#compact").addEventListener("change", e=>{
+  state.compact = e.target.checked;
+  document.querySelectorAll(".seat").forEach(s=>{
+    s.style.padding = state.compact ? "6px" : "10px";
+  });
+  save();
+});
+
+/* ===== URL Param theming & title & preload ===== */
+(function fromURL(){
+  const q=new URLSearchParams(location.search);
+  const accent=q.get("accent"); const title=q.get("title");
+  if(accent){ document.documentElement.style.setProperty('--brand-accent', accent); }
+  if(title){ document.title = `${title} · Seating Chart`; document.querySelector(".title").innerHTML = `<span class="accent">SAS</span> · ${title}`; }
+  const names=q.get("names"), rows=q.get("rows"), cols=q.get("cols"), group=q.get("group"), seed=q.get("seed"), sep=q.get("separate");
+  if(names) $("#names").value = names.split(",").map(s=>s.trim()).join("\n");
+  if(rows) $("#rows").value=rows; if(cols) $("#cols").value=cols; if(group) $("#groupSize").value=group; if(seed) $("#seed").value=seed;
+  if(sep){ $("#separate").value = sep.split(";").map(p=>p.split("|").join(",")).join("\n"); }
+})();
+
+/* ===== Wire & init ===== */
+$("#randomizeBtn").addEventListener("click", randomize);
+$("#clearLocksBtn").addEventListener("click", clearLocks);
+$("#clearBoardBtn").addEventListener("click", clearBoard);
+$("#exportCsvBtn").addEventListener("click", exportCSV);
+$("#printBtn").addEventListener("click", printBoard);
+["rows","cols","groupSize","layoutMode","seatShape","seed","names","separate"].forEach(id=>{
+  const el=$("#"+id); el.addEventListener(el.tagName==="TEXTAREA" ? "input":"change", save);
+});
+
+load();
+if(!state.names.length){
+  $("#names").value = `Ana
+Ben
+Carlos
+Dina
+Eli
+Fatima
+Gabe
+Hana
+Ivan
+Jada
+Ken
+Lia
+Mia
+Nate
+Omar
+Pia
+Quinn
+Rae
+Sam
+Tia
+Uma
+Vic
+Will
+Xena
+Yara
+Zoe`;
+}
+</script>
+</body>
+</html>
