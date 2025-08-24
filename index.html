@@ -6,47 +6,55 @@
 <title>Seating Chart · SAS</title>
 <style>
   :root{
-    --brand-bg:#0A2342; --brand-ink:#F8FAFC; --brand-sub:#C9D6E8;
-    --accent:#C8102E; --ok:#1FBF75; --line:#1d3c6a;
+    --bg:#0A2342; --ink:#F8FAFC; --sub:#C9D6E8; --accent:#C8102E; --ok:#1FBF75; --line:#1d3c6a;
     --seat-w:110px; --seat-h:70px; --gap:8px; --zoom:1;
   }
   html,body{height:100%} body{
-    margin:0; background:var(--brand-bg); color:var(--brand-ink);
-    font-family:ui-sans-serif,-apple-system,Segoe UI,Inter,Roboto,Arial;
-    background:
-      radial-gradient(1200px 600px at 20% -10%, rgba(255,255,255,.06), transparent 60%),
-      radial-gradient(1200px 600px at 110% 10%, rgba(255,255,255,.05), transparent 60%),
-      var(--brand-bg);
+    margin:0; color:var(--ink); font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial;
+    background: radial-gradient(1200px 600px at 20% -10%, rgba(255,255,255,.06), transparent 60%),
+                radial-gradient(1200px 600px at 110% 10%, rgba(255,255,255,.05), transparent 60%),
+                var(--bg);
   }
   .wrap{max-width:1200px;margin:0 auto;padding:16px 12px 28px}
   .bar{position:sticky;top:0;z-index:5;background:rgba(10,35,66,.9);backdrop-filter:blur(6px);border-bottom:1px solid rgba(255,255,255,.08);padding:10px 12px}
   .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
   .title{font-weight:800;font-size:16px;margin-right:auto}.accent{color:var(--accent)}
-  button{border:1px solid var(--line);background:#081b36;color:var(--brand-ink);padding:10px 12px;border-radius:12px;font-weight:700;cursor:pointer}
+  button{border:1px solid var(--line);background:#081b36;color:var(--ink);padding:10px 12px;border-radius:12px;font-weight:700;cursor:pointer}
   button.p{background:linear-gradient(120deg,var(--accent),#ff4b5f);border-color:transparent}
   button.ok{background:linear-gradient(120deg,var(--ok),#169f5f);border-color:transparent}
-  .grid{display:grid;gap:12px;margin-top:12px;grid-template-columns:1fr 1.2fr}
+  .grid{display:grid;gap:12px;margin-top:12px;grid-template-columns:1fr 1.25fr}
   @media (max-width:980px){.grid{grid-template-columns:1fr}}
   .card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:12px}
-  label{font-size:12px;color:var(--brand-sub);display:block;margin:8px 0 6px}
-  textarea,input,select{width:100%;background:#081b36;color:var(--brand-ink);border:1px solid var(--line);border-radius:12px;padding:12px 14px;box-sizing:border-box}
+  label{font-size:12px;color:var(--sub);display:block;margin:8px 0 6px}
+  textarea,input,select{width:100%;background:#081b36;color:var(--ink);border:1px solid var(--line);border-radius:12px;padding:12px 14px;box-sizing:border-box}
   textarea{min-height:120px;resize:vertical}
-  .note{font-size:12px;color:var(--brand-sub)}
+  .note{font-size:12px;color:var(--sub)}
   .okmsg{color:#dcfce7;background:rgba(31,191,117,.12);border:1px solid rgba(31,191,117,.35);padding:8px 10px;border-radius:10px;margin-top:8px}
   .errmsg{color:#fecaca;background:rgba(200,16,46,.12);border:1px solid rgba(200,16,46,.35);padding:8px 10px;border-radius:10px;margin-top:8px}
+
+  /* Board */
   .boardOuter{overflow:auto;padding:6px;transform:scale(var(--zoom));transform-origin:top left}
   .board{display:grid;gap:var(--gap);padding:8px;background:rgba(255,255,255,.03);border:1px dashed rgba(255,255,255,.1);border-radius:14px}
   .seat{min-width:var(--seat-w);min-height:var(--seat-h);background:#081b36;border:1px solid var(--line);border-radius:12px;padding:10px;display:flex;flex-direction:column;justify-content:space-between;user-select:none}
   .seat .name{font-weight:800;font-size:15px;line-height:1.2}
-  .seat .meta{display:flex;justify-content:space-between;color:var(--brand-sub);font-size:11px}
+  .seat .meta{display:flex;justify-content:space-between;color:var(--sub);font-size:11px}
   .seat.locked{outline:2px dashed #f59e0b}
   .seat[draggable=true]{cursor:grab}.seat.dragging{opacity:.4}.seat.drop{outline:2px solid var(--accent)}
   .legend{display:flex;flex-wrap:wrap;gap:8px;margin:10px 6px 0}
   .chip{display:inline-flex;gap:6px;align-items:center;border:1px solid rgba(255,255,255,.2);border-radius:999px;padding:6px 10px;font-size:12px}
   .sw{width:14px;height:14px;border-radius:3px;border:1px solid rgba(255,255,255,.25)}
+
+  /* Tables mode */
+  .table{background:#0b2043;border:1px solid #2a4a80;border-radius:12px;padding:8px}
+  .tableHead{display:flex;justify-content:space-between;align-items:center;margin:0 0 6px 0}
+  .tableName{font-weight:800;font-size:13px}
+  .tableSeats{display:grid;gap:6px}
+  .tBadge{font-size:10px;color:#cfe0ff;border:1px solid #3a5d9b;border-radius:999px;padding:2px 6px}
+  .table .seat{min-width:unset}
+  
   /* Modal */
   .modal{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;z-index:50}
-  .modal .box{background:#0e2a51;border:1px solid rgba(255,255,255,.15);border-radius:14px;max-width:680px;width:92%;padding:14px}
+  .modal .box{background:#0e2a51;border:1px solid rgba(255,255,255,.15);border-radius:14px;max-width:720px;width:92%;padding:14px}
   .flex{display:flex;gap:8px;flex-wrap:wrap}
 </style>
 </head>
@@ -70,14 +78,28 @@ Ben, Carlos
 Dina"></textarea>
 
         <div class="row">
-          <div><label>Rows</label><input id="rows" type="number" min="1" value="5" inputmode="numeric"></div>
-          <div><label>Columns</label><input id="cols" type="number" min="1" value="6" inputmode="numeric"></div>
-          <div><label>Group size</label><input id="gsize" type="number" min="1" value="2" inputmode="numeric"></div>
+          <div>
+            <label>Layout type</label>
+            <select id="layoutType">
+              <option value="grid">Grid (individual seats)</option>
+              <option value="tables">Tables / Pods</option>
+            </select>
+          </div>
+          <div id="gridInputs" class="row" style="flex:2">
+            <div><label>Rows</label><input id="rows" type="number" min="1" value="5" inputmode="numeric"></div>
+            <div><label>Columns</label><input id="cols" type="number" min="1" value="6" inputmode="numeric"></div>
+            <div><label>Group size</label><input id="gsize" type="number" min="1" value="2" inputmode="numeric"></div>
+          </div>
+          <div id="tableInputs" class="row" style="flex:2; display:none">
+            <div><label>Table rows</label><input id="trows" type="number" min="1" value="2" inputmode="numeric"></div>
+            <div><label>Table cols</label><input id="tcols" type="number" min="1" value="3" inputmode="numeric"></div>
+            <div><label>Seats / table</label><input id="tseats" type="number" min="2" value="4" inputmode="numeric"></div>
+          </div>
         </div>
 
-        <div class="row">
+        <div class="row" id="gridMore">
           <div>
-            <label>Layout mode</label>
+            <label>Grid fill mode</label>
             <select id="layout">
               <option value="rowfill">Fill left→right by rows</option>
               <option value="colfill">Fill top→bottom by columns</option>
@@ -91,7 +113,7 @@ Dina"></textarea>
             </select>
           </div>
           <div>
-            <label>Random seed (optional)</label>
+            <label>Random seed</label>
             <input id="seed" placeholder="e.g. 42" inputmode="numeric">
           </div>
         </div>
@@ -124,23 +146,23 @@ Dina"></textarea>
   <div class="modal" id="rulesModal" role="dialog" aria-modal="true">
     <div class="box">
       <h3 style="margin:8px 0 6px">Class Rules</h3>
-      <div class="note" style="margin-bottom:10px">Would you like to set rules for the randomizer? (You can edit anytime.)</div>
+      <div class="note" style="margin-bottom:10px">Would you like to set rules for the randomizer?</div>
       <div class="flex">
         <div class="card" style="flex:1">
           <b>Keep apart</b>
-          <div class="note">One pair per line, comma between names. We avoid side-by-side seats in the same row. (Optionally toggle vertical below.)</div>
+          <div class="note">Grid: avoid side-by-side (optionally up/down). Tables: avoid **same table**.</div>
           <textarea id="apartTxt" placeholder="Ana,Ben
 Carlos,Dina"></textarea>
         </div>
         <div class="card" style="flex:1">
-          <b>Keep together (same group)</b>
-          <div class="note">One pair per line, comma between names. They will end up in the <u>same group</u> (based on group size).</div>
+          <b>Keep together</b>
+          <div class="note">Grid: same group. Tables: **same table**.</div>
           <textarea id="togetherTxt" placeholder="Eli,Gabe
 Hana,Ivan"></textarea>
         </div>
       </div>
       <div class="row" style="margin-top:10px">
-        <label class="note"><input type="checkbox" id="verticalAdj"> Also treat up/down as adjacent (for keep-apart)</label>
+        <label class="note"><input type="checkbox" id="verticalAdj"> In Grid, also avoid up/down adjacency</label>
         <span style="flex:1"></span>
         <button id="rulesSave" class="ok">Save rules</button>
         <button id="rulesClose">Close</button>
@@ -149,7 +171,7 @@ Hana,Ivan"></textarea>
   </div>
 
 <script>
-/* ===== Helpers ===== */
+/* ========== Helpers ========== */
 const $=s=>document.querySelector(s);
 const board=$("#board"), legend=$("#legend"), msg=$("#msg"), modal=$("#rulesModal");
 const idx=(r,c,cols)=>r*cols+c;
@@ -158,41 +180,46 @@ function parseRoster(t){return Array.from(new Set(t.split(/[\n,]+/).map(s=>s.tri
 function parsePairs(t){const p=[];t.split(/\n+/).map(s=>s.trim()).filter(Boolean).forEach(line=>{const[a,b]=line.split(",").map(x=>x?.trim()).filter(Boolean);if(a&&b)p.push([a,b])});return p}
 function mulberry32(a){return function(){var t=a+=0x6D2B79F5;t=Math.imul(t^t>>>15,t|1);t^=t+Math.imul(t^t>>>7,t|61);return ((t^t>>>14)>>>0)/4294967296}}
 function seededShuffle(arr,seed){const rnd=(seed!==""&&!Number.isNaN(+seed))?mulberry32(+seed):Math.random;const a=arr.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(rnd()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+const palette=n=>Array.from({length:n},(_,i)=>["#C8102E","#1FBF75","#F59E0B","#60A5FA","#A78BFA","#F472B6","#06B6D4","#84CC16","#FB7185","#F97316"][i%10]);
 
-/* ===== State ===== */
+/* ========== State ========== */
 const S={
+  layoutType: "grid", // grid | tables
+  // grid
   rows:+$("#rows").value, cols:+$("#cols").value, gsize:+$("#gsize").value,
-  layout:$("#layout").value, color:$("#coloring").value, seed:$("#seed").value,
-  names:[], placed:[], locked:{}, groups:{}, colors:[],
+  layout:$("#layout").value, color:$("#coloring").value,
+  // tables
+  trows:+$("#trows").value, tcols:+$("#tcols").value, tseats:+$("#tseats").value,
+  // common
+  seed:$("#seed").value, names:[], placed:[], locked:{}, groups:{}, colors:[],
+  // tables specifics
+  tables: [], // [{name:"Table 1", seats: [name,...]}]
   rules:{apart:[], together:[], vertical:false},
   zoom:1, seatScale:1, gap:8
 };
 
-/* ===== Persist ===== */
-function save(){localStorage.setItem("seatingRulesV1",JSON.stringify(S))}
+/* ========== Persist ========== */
+function save(){localStorage.setItem("seatingTablesV1",JSON.stringify(S))}
 function load(){try{
-  const s=JSON.parse(localStorage.getItem("seatingRulesV1")||"{}");
-  Object.assign(S,s);
-  $("#rows").value=S.rows; $("#cols").value=S.cols; $("#gsize").value=S.gsize;
-  $("#layout").value=S.layout; $("#coloring").value=S.color; $("#seed").value=S.seed||"";
-  $("#names").value=(S.names||[]).join("\n");
+  const s=JSON.parse(localStorage.getItem("seatingTablesV1")||"{}"); Object.assign(S,s);
+  $("#layoutType").value=S.layoutType||"grid";
+  $("#rows").value=S.rows||5; $("#cols").value=S.cols||6; $("#gsize").value=S.gsize||2;
+  $("#layout").value=S.layout||"rowfill"; $("#coloring").value=S.color||"solo";
+  $("#trows").value=S.trows||2; $("#tcols").value=S.tcols||3; $("#tseats").value=S.tseats||4;
+  $("#seed").value=S.seed||""; $("#names").value=(S.names||[]).join("\n");
   $("#zoom").value=Math.round((S.zoom||1)*100); document.documentElement.style.setProperty('--zoom', String(S.zoom||1));
-  $("#seat").value=Math.round((S.seatScale||1)*100); document.documentElement.style.setProperty('--seat-w', `${110*(S.seatScale||1)}px`); document.documentElement.style.setProperty('--seat-h', `${70*(S.seatScale||1)}px`);
+  $("#seat").value=Math.round((S.seatScale||1)*100);
+  document.documentElement.style.setProperty('--seat-w', `${110*(S.seatScale||1)}px`);
+  document.documentElement.style.setProperty('--seat-h', `${70*(S.seatScale||1)}px`);
   $("#gap").value=S.gap||8; document.documentElement.style.setProperty('--gap', `${S.gap||8}px`);
+  toggleLayoutInputs();
 } catch(e){}}
 
-/* ===== Colors / groups ===== */
-function palette(n){const base=["#C8102E","#1FBF75","#F59E0B","#60A5FA","#A78BFA","#F472B6","#06B6D4","#84CC16","#FB7185","#F97316"];return Array.from({length:n},(_,i)=>base[i%base.length])}
-function chunk(arr,size){const out=[];for(let i=0;i<arr.length;i+=size) out.push(arr.slice(i,i+size));return out}
-function mapGroups(gs){const m={};gs.forEach((g,i)=>g.forEach(n=>m[n]=i));return m}
-
-/* ===== Constraints ===== */
+/* ========== Grid logic ========== */
 function adjacency(rows,cols,vertical=false){const a={};for(let r=0;r<rows;r++){for(let c=0;c<cols;c++){const i=idx(r,c,cols),n=[];if(c>0)n.push(idx(r,c-1,cols));if(c<cols-1)n.push(idx(r,c+1,cols));if(vertical){if(r>0)n.push(idx(r-1,c,cols));if(r<rows-1)n.push(idx(r+1,c,cols));}a[i]=n}}return a}
-function violatesApart(placed,pairs,adj){if(!pairs?.length)return false;const pos={};placed.forEach((n,i)=>{if(n)pos[n]=i});for(const[a,b] of pairs){const ia=pos[a],ib=pos[b];if(ia==null||ib==null)continue;if(adj[ia]?.includes(ib))return true}return false}
-function violatesTogether(placed,pairs,groups){if(!pairs?.length)return false;const pos={};placed.forEach((n,i)=>{if(n)pos[n]=i});for(const[a,b] of pairs){const ga=groups[a],gb=groups[b];if(a in pos && b in pos && (ga==null||gb==null || ga!==gb)) return true}return false}
-
-/* ===== Placement ===== */
-function place(shuffled){
+function violatesApartGrid(placed,pairs,adj){if(!pairs?.length)return false;const pos={};placed.forEach((n,i)=>{if(n)pos[n]=i});for(const[a,b] of pairs){const ia=pos[a],ib=pos[b];if(ia==null||ib==null)continue;if(adj[ia]?.includes(ib))return true}return false}
+function violatesTogetherGrid(placed,pairs,groups){if(!pairs?.length)return false;for(const[a,b] of pairs){if(groups[a]==null||groups[b]==null||groups[a]!==groups[b])return true}return false}
+function placeGrid(shuffled){
   const total=S.rows*S.cols, out=Array(total).fill("");
   for(const k of Object.keys(S.locked)){const i=+k;if(i>=0&&i<total) out[i]=S.locked[k]}
   const lockedNames=new Set(Object.values(S.locked));
@@ -203,8 +230,49 @@ function place(shuffled){
   return out;
 }
 
-/* ===== Draw ===== */
+/* ========== Tables logic ========== */
+function buildTablesMatrix(trows,tcols,tseats){
+  const tables=[]; let count=trows*tcols;
+  for(let i=0;i<count;i++){tables.push({name:`Table ${i+1}`, seats:Array(tseats).fill("")});}
+  return tables;
+}
+function randomizeTables(shuffled){
+  // keep existing table names; rebuild seats but respect locks by absolute seat index
+  const totalTables=S.trows*S.tcols; if(!S.tables?.length) S.tables=buildTablesMatrix(S.trows,S.tcols,S.tseats);
+  // flatten locked to absolute seat index across all tables
+  const absSeats=totalTables*S.tseats;
+  const placed=Array(absSeats).fill("");
+  for(const k of Object.keys(S.locked)){const i=+k;if(i>=0&&i<absSeats) placed[i]=S.locked[k]}
+  const lockedNames=new Set(Object.values(S.locked));
+  const toPlace=shuffled.filter(n=>!lockedNames.has(n)).slice(0,absSeats);
+  const empties=[...Array(absSeats).keys()].filter(i=>!placed[i]);
+  toPlace.forEach((n,i)=>{if(empties[i]!=null) placed[empties[i]]=n});
+  // write back into tables
+  let p=0; for(let t=0;t<totalTables;t++){for(let s=0;s<S.tseats;s++){S.tables[t].seats[s]=placed[p++]||""}}
+  return placed; // for CSV
+}
+function violatesApartTables(tables,pairs){
+  if(!pairs?.length)return false;
+  const tableByName={};
+  tables.forEach((tbl,ti)=>tbl.seats.forEach(n=>{if(n)tableByName[n]=ti}));
+  for(const[a,b] of pairs){ if(tableByName[a]!=null && tableByName[b]!=null && tableByName[a]===tableByName[b]) return true; }
+  return false;
+}
+function violatesTogetherTables(tables,pairs){
+  if(!pairs?.length)return false;
+  const tableByName={};
+  tables.forEach((tbl,ti)=>tbl.seats.forEach(n=>{if(n)tableByName[n]=ti}));
+  for(const[a,b] of pairs){ if(!(tableByName[a]!=null && tableByName[b]!=null && tableByName[a]===tableByName[b])) return true; }
+  return false;
+}
+
+/* ========== Draw ========== */
 function draw(){
+  if(S.layoutType==="grid"){ drawGrid(); }
+  else { drawTables(); }
+  save();
+}
+function drawGrid(){
   const total=S.rows*S.cols;
   board.style.gridTemplateColumns=`repeat(${S.cols}, minmax(var(--seat-w), 1fr))`;
   board.innerHTML="";
@@ -213,22 +281,18 @@ function draw(){
     const nm=S.placed[i]||"";
     const name=document.createElement("div"); name.className="name"; name.textContent=nm||"—";
     const meta=document.createElement("div"); meta.className="meta"; const left=document.createElement("span"); const right=document.createElement("span");
-    if(S.locked[i]){d.classList.add("locked"); left.textContent="🔒 locked";} right.textContent=`#${i+1}`;
+    if(S.locked[i]){d.classList.add("locked"); left.textContent="🔒"} right.textContent=`#${i+1}`;
     meta.append(left,right); d.append(name,meta);
-
     // group color
     if(S.color==="groups"){const gid=S.groups[nm]; if(gid!=null){const clr=S.colors[gid%S.colors.length]; d.style.background=`linear-gradient(135deg, ${toRGBA(clr,.28)}, #081b36 65%)`; d.style.borderColor=clr+"88";}}
-
-    // click = lock/unlock; long-press = reassign; drag = swap
     d.addEventListener("click",()=>toggleLock(i));
-    wireLongPress(d,()=>reassignSeat(i));
-    wireDrag(d);
+    wireLongPress(d,()=>reassignSeatGrid(i));
+    wireDragGrid(d);
     board.appendChild(d);
   }
-  renderLegend();
-  save();
+  renderLegendGrid();
 }
-function renderLegend(){
+function renderLegendGrid(){
   legend.innerHTML=""; if(S.color!=="groups")return;
   const inv=[]; for(const[n,g] of Object.entries(S.groups)){if(!inv[g])inv[g]=[];inv[g].push(n)}
   inv.filter(Boolean).forEach((members,i)=>{const chip=document.createElement("div");chip.className="chip";
@@ -237,79 +301,194 @@ function renderLegend(){
   });
 }
 
-/* ===== Interactions ===== */
-function randomize(){
-  S.rows=Math.max(1,+$("#rows").value||1); S.cols=Math.max(1,+$("#cols").value||1);
-  S.gsize=Math.max(1,+$("#gsize").value||1); S.layout=$("#layout").value; S.color=$("#coloring").value;
-  S.seed=$("#seed").value; S.names=parseRoster($("#names").value);
-  if(!S.names.length){flash("Please add at least one name.",true);return}
-  const tries=2500, adj=adjacency(S.rows,S.cols,S.rules.vertical);
-  let best=null;
-  for(let t=0;t<tries;t++){
-    const sh=seededShuffle(S.names, S.seed? (+S.seed+t):"");
-    // create groups off the shuffled order
-    const gs=chunk(sh,S.gsize); S.groups=mapGroups(gs); S.colors=palette(gs.length);
-    const placed=place(sh);
-    if(!violatesApart(placed,S.rules.apart,adj) && !violatesTogether(placed,S.rules.together,S.groups)){best=placed;break}
-    if(t===0) best=placed;
-  }
-  S.placed=best.slice(0,S.rows*S.cols); draw(); flash("Seating updated.",false);
-}
-function toggleLock(i){const nm=S.placed[i]; if(!nm)return; if(S.locked[i]) delete S.locked[i]; else{for(const[k,v] of Object.entries(S.locked)){if(v===nm) delete S.locked[k]} S.locked[i]=nm} draw()}
-function exportCSV(){let out="Row,Col,Seat,Name,Group\n";for(let r=0;r<S.rows;r++){for(let c=0;c<S.cols;c++){const i=idx(r,c,S.cols), n=S.placed[i]||"", g=S.groups[n]!=null?S.groups[n]+1:""; out+=`${r+1},${c+1},${i+1},"${n.replace(/"/g,'""')}",${g}\n`}} const blob=new Blob([out],{type:"text/csv"}); const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download="seating-chart.csv"; a.click()}
-function printBoard(){window.print()}
-function flash(t,err){msg.innerHTML=`<div class="${err?'errmsg':'okmsg'}">${t}</div>`; setTimeout(()=>msg.innerHTML="",2500)}
+function drawTables(){
+  // grid of tables
+  board.style.gridTemplateColumns = `repeat(${S.tcols}, minmax(200px, 1fr))`;
+  board.innerHTML="";
+  const totalTables=S.trows*S.tcols;
+  for(let ti=0; ti<totalTables; ti++){
+    if(!S.tables[ti]) S.tables[ti] = {name:`Table ${ti+1}`, seats:Array(S.tseats).fill("")};
+    const t=S.tables[ti];
+    const box=document.createElement("div"); box.className="table";
+    // head
+    const head=document.createElement("div"); head.className="tableHead";
+    const name=document.createElement("div"); name.className="tableName"; name.textContent=t.name;
+    name.title="Tap to rename";
+    name.addEventListener("click",()=>{
+      const nv=prompt("Table name:", t.name||`Table ${ti+1}`); if(!nv) return; t.name=nv; draw();
+    });
+    const badge=document.createElement("div"); badge.className="tBadge"; badge.textContent=`${t.seats.filter(Boolean).length}/${S.tseats}`;
+    head.append(name,badge);
+    // seats grid (2 x (tseats/2) for compact), fallback to 1 row
+    const cols = (S.tseats%2===0) ? 2 : 1;
+    const seatWrap=document.createElement("div"); seatWrap.className="tableSeats";
+    seatWrap.style.gridTemplateColumns = `repeat(${cols}, minmax(90px, 1fr))`;
+    // seats
+    for(let si=0; si<S.tseats; si++){
+      const absIndex = ti*S.tseats + si; // for locks/drag
+      const seat=document.createElement("div"); seat.className="seat"; seat.dataset.index=absIndex; seat.draggable=true;
+      const nm=t.seats[si]||"";
+      const nmEl=document.createElement("div"); nmEl.className="name"; nmEl.textContent=nm||"—";
+      const meta=document.createElement("div"); meta.className="meta"; const left=document.createElement("span"); const right=document.createElement("span");
+      if(S.locked[absIndex]){seat.classList.add("locked"); left.textContent="🔒"}
+      right.textContent = `${t.name} · ${si+1}`;
+      meta.append(left,right); seat.append(nmEl,meta);
 
-/* Drag & drop swap */
-let dragFrom=null;
-function wireDrag(el){
-  el.addEventListener("dragstart",e=>{dragFrom=+el.dataset.index; el.classList.add("dragging"); e.dataTransfer.effectAllowed="move"});
+      seat.addEventListener("click",()=>toggleLock(absIndex));
+      wireLongPress(seat,()=>reassignSeatTable(ti,si));
+      wireDragTable(seat);
+      seatWrap.appendChild(seat);
+    }
+    box.append(head, seatWrap);
+    board.appendChild(box);
+  }
+  legend.innerHTML=""; // not using color legend in tables for now (can add teams color later)
+}
+
+/* ========== Interactions (common) ========== */
+function flash(t,err){msg.innerHTML=`<div class="${err?'errmsg':'okmsg'}">${t}</div>`; setTimeout(()=>msg.innerHTML="",2500)}
+function toggleLock(i){const nm=(S.layoutType==="grid")? S.placed[i] : absoluteSeatName(i); if(!nm)return; if(S.locked[i]) delete S.locked[i]; else{for(const[k,v] of Object.entries(S.locked)){if(v===nm) delete S.locked[k]} S.locked[i]=nm} draw()}
+function absoluteSeatName(i){
+  const ti=Math.floor(i/S.tseats), si=i%S.tseats; return S.tables[ti]?.seats[si]||"";
+}
+
+/* Drag/swap — GRID */
+let dragFromGrid=null;
+function wireDragGrid(el){
+  el.addEventListener("dragstart",e=>{dragFromGrid=+el.dataset.index; el.classList.add("dragging"); e.dataTransfer.effectAllowed="move"});
   el.addEventListener("dragover",e=>{e.preventDefault(); el.classList.add("drop"); e.dataTransfer.dropEffect="move"});
   el.addEventListener("dragleave",()=>el.classList.remove("drop"));
-  el.addEventListener("dragend",()=>{dragFrom=null; el.classList.remove("dragging"); document.querySelectorAll(".seat").forEach(x=>x.classList.remove("drop"))});
+  el.addEventListener("dragend",()=>{dragFromGrid=null; el.classList.remove("dragging"); document.querySelectorAll(".seat").forEach(x=>x.classList.remove("drop"))});
   el.addEventListener("drop",e=>{
-    e.preventDefault(); const to=+el.dataset.index; if(dragFrom==null||to===dragFrom) return;
-    const a=S.placed[dragFrom], b=S.placed[to]; S.placed[dragFrom]=b; S.placed[to]=a;
-    // keep locks attached to positions
-    const lf=S.locked[dragFrom], lt=S.locked[to]; delete S.locked[dragFrom]; delete S.locked[to];
-    if(lf && b===lf) S.locked[to]=b; if(lt && a===lt) S.locked[dragFrom]=a;
+    e.preventDefault(); const to=+el.dataset.index; if(dragFromGrid==null||to===dragFromGrid) return;
+    const a=S.placed[dragFromGrid], b=S.placed[to]; S.placed[dragFromGrid]=b; S.placed[to]=a;
+    const lf=S.locked[dragFromGrid], lt=S.locked[to]; delete S.locked[dragFromGrid]; delete S.locked[to];
+    if(lf && b===lf) S.locked[to]=b; if(lt && a===lt) S.locked[dragFromGrid]=a;
+    draw();
+  });
+}
+
+/* Drag/swap — TABLES */
+let dragFromTable=null;
+function wireDragTable(el){
+  el.addEventListener("dragstart",e=>{dragFromTable=+el.dataset.index; el.classList.add("dragging"); e.dataTransfer.effectAllowed="move"});
+  el.addEventListener("dragover",e=>{e.preventDefault(); el.classList.add("drop"); e.dataTransfer.dropEffect="move"});
+  el.addEventListener("dragleave",()=>el.classList.remove("drop"));
+  el.addEventListener("dragend",()=>{dragFromTable=null; el.classList.remove("dragging"); document.querySelectorAll(".seat").forEach(x=>x.classList.remove("drop"))});
+  el.addEventListener("drop",e=>{
+    e.preventDefault(); const to=+el.dataset.index; if(dragFromTable==null||to===dragFromTable) return;
+    const fromT=Math.floor(dragFromTable/S.tseats), fromS=dragFromTable%S.tseats;
+    const toT=Math.floor(to/S.tseats), toS=to%S.tseats;
+    const a=S.tables[fromT].seats[fromS], b=S.tables[toT].seats[toS];
+    S.tables[fromT].seats[fromS]=b; S.tables[toT].seats[toS]=a;
+    const lf=S.locked[dragFromTable], lt=S.locked[to]; delete S.locked[dragFromTable]; delete S.locked[to];
+    if(lf && b===lf) S.locked[to]=b; if(lt && a===lt) S.locked[dragFromTable]=a;
     draw();
   });
 }
 
 /* Long-press to reassign */
-function wireLongPress(el,cb){let t=null; el.addEventListener("touchstart",e=>{t=setTimeout(()=>cb(),450)}, {passive:true}); el.addEventListener("touchend",()=>clearTimeout(t)); el.addEventListener("mousedown",e=>{t=setTimeout(()=>cb(),450)}); el.addEventListener("mouseup",()=>clearTimeout(t))}
-function reassignSeat(i){
-  // Build a quick picker from roster
+function wireLongPress(el,cb){let t=null; el.addEventListener("touchstart",()=>{t=setTimeout(()=>cb(),450)},{passive:true}); el.addEventListener("touchend",()=>clearTimeout(t)); el.addEventListener("mousedown",()=>{t=setTimeout(()=>cb(),450)}); el.addEventListener("mouseup",()=>clearTimeout(t))}
+function reassignSeatGrid(i){
   const list=S.names.slice().sort((a,b)=>a.localeCompare(b));
   const curr=S.placed[i]||"";
-  const pick=prompt("Assign seat #"+(i+1)+" to:", curr ? `${curr}` : list[0]||"");
-  if(!pick) return;
+  const pick=prompt("Assign seat #"+(i+1), curr || list[0]||""); if(!pick) return;
   if(!S.names.includes(pick)){flash("Name not in roster. Add it first.",true);return}
-  // remove pick from its current seat
-  const j=S.placed.findIndex(n=>n===pick); if(j>=0) S.placed[j]="";
-  S.placed[i]=pick; draw();
+  const j=S.placed.findIndex(n=>n===pick); if(j>=0) S.placed[j]=""; S.placed[i]=pick; draw();
+}
+function reassignSeatTable(ti,si){
+  const list=S.names.slice().sort((a,b)=>a.localeCompare(b));
+  const curr=S.tables[ti].seats[si]||"";
+  const pick=prompt(`${S.tables[ti].name} seat ${si+1}`, curr || list[0]||""); if(!pick) return;
+  if(!S.names.includes(pick)){flash("Name not in roster. Add it first.",true);return}
+  // remove wherever it is
+  for(const tbl of S.tables){const k=tbl.seats.indexOf(pick); if(k>=0) tbl.seats[k]="";}
+  S.tables[ti].seats[si]=pick; draw();
 }
 
-/* ===== Rules modal ===== */
+/* ========== Randomize ========== */
+function randomize(){
+  S.layoutType=$("#layoutType").value;
+  S.names=parseRoster($("#names").value);
+  if(!S.names.length){flash("Please add at least one name.",true);return}
+  S.seed=$("#seed").value;
+
+  if(S.layoutType==="grid"){
+    S.rows=Math.max(1,+$("#rows").value||1); S.cols=Math.max(1,+$("#cols").value||1);
+    S.gsize=Math.max(1,+$("#gsize").value||1); S.layout=$("#layout").value; S.color=$("#coloring").value;
+    const adj=adjacency(S.rows,S.cols,S.rules.vertical);
+    const tries=2500; let best=null;
+    for(let t=0;t<tries;t++){
+      const sh=seededShuffle(S.names, S.seed? (+S.seed+t):"");
+      const groups=[]; for(let i=0;i<sh.length;i+=S.gsize) groups.push(sh.slice(i,i+S.gsize));
+      S.groups={}; groups.forEach((g,gi)=>g.forEach(n=>S.groups[n]=gi)); S.colors=palette(groups.length);
+      const placed=placeGrid(sh);
+      if(!violatesApartGrid(placed,S.rules.apart,adj) && !violatesTogetherGrid(placed,S.rules.together,S.groups)){best=placed;break}
+      if(t===0) best=placed;
+    }
+    S.placed=best.slice(0,S.rows*S.cols);
+  }else{
+    S.trows=Math.max(1,+$("#trows").value||1); S.tcols=Math.max(1,+$("#tcols").value||1); S.tseats=Math.max(2,+$("#tseats").value||2);
+    const tries=2500; let ok=null;
+    for(let t=0;t<tries;t++){
+      const sh=seededShuffle(S.names, S.seed? (+S.seed+t):"");
+      S.tables = buildTablesMatrix(S.trows,S.tcols,S.tseats); // reset seats but keep names later
+      randomizeTables(sh);
+      if(!violatesApartTables(S.tables,S.rules.apart) && !violatesTogetherTables(S.tables,S.rules.together)){ok=true;break}
+    }
+    // nothing else; S.tables already filled
+  }
+  draw(); flash("Seating updated.",false);
+}
+
+/* ========== Export / Print ========== */
+function exportCSV(){
+  let out="Mode,Table,Row,Col,Seat,Name\n";
+  if(S.layoutType==="grid"){
+    for(let r=0;r<S.rows;r++){for(let c=0;c<S.cols;c++){
+      const i=idx(r,c,S.cols), n=S.placed[i]||"";
+      out+=`grid,,${r+1},${c+1},${i+1},"${n.replace(/"/g,'""')}"\n`;
+    }}
+  }else{
+    const totalTables=S.trows*S.tcols;
+    for(let ti=0;ti<totalTables;ti++){
+      const tbl=S.tables[ti];
+      for(let si=0;si<S.tseats;si++){
+        const n=tbl.seats[si]||"";
+        out+=`tables,${tbl.name},,,${si+1},"${n.replace(/"/g,'""')}"\n`;
+      }
+    }
+  }
+  const blob=new Blob([out],{type:"text/csv"}); const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download="seating-chart.csv"; a.click();
+}
+function printBoard(){window.print()}
+
+/* ========== Rules modal & UI ========== */
 function openRules(){ $("#apartTxt").value=S.rules.apart.map(p=>p.join(",")).join("\n"); $("#togetherTxt").value=S.rules.together.map(p=>p.join(",")).join("\n"); $("#verticalAdj").checked=!!S.rules.vertical; modal.style.display="flex"}
 function saveRules(){ S.rules.apart=parsePairs($("#apartTxt").value); S.rules.together=parsePairs($("#togetherTxt").value); S.rules.vertical=$("#verticalAdj").checked; save(); modal.style.display="none"; flash("Rules saved.",false)}
+function toggleLayoutInputs(){
+  const type=$("#layoutType").value;
+  $("#gridInputs").style.display = type==="grid" ? "flex" : "none";
+  $("#gridMore").style.display   = type==="grid" ? "flex" : "none";
+  $("#tableInputs").style.display= type==="tables" ? "flex" : "none";
+}
 
-/* ===== Wire UI ===== */
+/* ========== Wire ========== */
 $("#randomBtn").addEventListener("click", randomize);
 $("#exportBtn").addEventListener("click", exportCSV);
 $("#printBtn").addEventListener("click", printBoard);
 $("#rulesBtn").addEventListener("click", openRules);
 $("#rulesSave").addEventListener("click", saveRules);
 $("#rulesClose").addEventListener("click", ()=>modal.style.display="none");
-["rows","cols","gsize","layout","coloring","seed","names"].forEach(id=>{
+$("#layoutType").addEventListener("change", ()=>{S.layoutType=$("#layoutType").value; toggleLayoutInputs(); save(); draw();});
+["rows","cols","gsize","layout","coloring","seed","names","trows","tcols","tseats"].forEach(id=>{
   const el=$("#"+id); el.addEventListener(el.tagName==="TEXTAREA"?"input":"change", save);
 });
 $("#zoom").addEventListener("input",e=>{S.zoom=(+e.target.value)/100;document.documentElement.style.setProperty('--zoom',String(S.zoom));save()});
 $("#seat").addEventListener("input",e=>{S.seatScale=(+e.target.value)/100;document.documentElement.style.setProperty('--seat-w',`${110*S.seatScale}px`);document.documentElement.style.setProperty('--seat-h',`${70*S.seatScale}px`);save()});
 $("#gap").addEventListener("input",e=>{S.gap=+e.target.value;document.documentElement.style.setProperty('--gap',`${S.gap}px`);save()});
 
-/* ===== Init ===== */
+/* ========== Init ========== */
 load();
 if(!(localStorage.getItem("askedRulesOnce")||"")){ modal.style.display="flex"; localStorage.setItem("askedRulesOnce","1") }
 if(!S.names?.length){ $("#names").value=`Ana
@@ -338,6 +517,7 @@ Will
 Xena
 Yara
 Zoe`; }
+draw();
 </script>
 </body>
 </html>
